@@ -67,52 +67,62 @@
     <div class="container mt-5">
         <div class="card">
             <div class="card-body">
-                <h4 class="card-title">Add Purchase</h4>
-                <form>
+                <h4 class="card-title">Add Transaction</h4>
+                <form @submit.prevent="submitTransaction">
                     <div class="mb-3">
-                        <label for="purchaseName" class="form-label">Name</label>
-                        <input type="text" class="form-control" id="purchaseName">
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" id="singleTransaction" value="single" v-model="transaction.type">
+                            <label class="form-check-label" for="singleTransaction">Single Transaction</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" id="repeatingTransaction" value="repeating" v-model="transaction.type">
+                            <label class="form-check-label" for="repeatingTransaction">Repeating Transaction</label>
+                        </div>
                     </div>
+    
+                    <!-- Common fields -->
                     <div class="mb-3">
-                        <label for="purchaseDate" class="form-label">Date</label>
-                        <input type="date" class="form-control" id="purchaseDate">
+                        <label for="transactionName" class="form-label">Name</label>
+                        <input type="text" class="form-control" id="transactionName" v-model="transaction.name">
                     </div>
+    
+                    <!-- Specific field for single transaction -->
+                    <div class="mb-3" v-if="transaction.type === 'single'">
+                        <label for="transactionDate" class="form-label">Date</label>
+                        <input type="date" class="form-control" id="transactionDate" v-model="transaction.date">
+                    </div>
+    
+                    <!-- Fields for repeating transaction -->
+                    <template v-if="transaction.type === 'repeating'">
+                        <div class="mb-3">
+                            <label for="validFrom" class="form-label">Valid From</label>
+                            <input type="date" class="form-control" id="validFrom" v-model="transaction.validFrom">
+                        </div>
+                        <div class="mb-3">
+                            <label for="validUntil" class="form-label">Valid Until</label>
+                            <input type="date" class="form-control" id="validUntil" v-model="transaction.validUntil">
+                        </div>
+                        <div class="mb-3">
+                            <label for="interval" class="form-label">Interval</label>
+                            <select id="interval" class="form-select" v-model="transaction.interval">
+                                <option value="monthly">Every Month</option>
+                                <option value="yearly">Once a Year</option>
+                                <option value="biyearly">Twice a Year</option>
+                            </select>
+                        </div>
+                    </template>
+    
                     <div class="mb-3">
-                        <label for="purchaseAmount" class="form-label">Amount</label>
-                        <input type="number" class="form-control" id="purchaseAmount">
+                        <label for="amount" class="form-label">Amount</label>
+                        <input type="number" class="form-control" id="amount" v-model="transaction.amount">
                     </div>
+    
                     <button type="submit" class="btn btn-primary">Submit</button>
                 </form>
             </div>
         </div>
     </div>
-
-    <div class="container mt-5">
-        <div class="card">
-            <div class="card-body">
-                <h4 class="card-title">Add Fix Costs</h4>
-                <form>
-                    <div class="mb-3">
-                        <label for="purchaseName" class="form-label">Name</label>
-                        <input type="text" class="form-control" id="purchaseName">
-                    </div>
-                    <div class="mb-3">
-                        <label for="validFrom" class="form-label">Valid From</label>
-                        <input type="date" class="form-control" id="validFrom">
-                    </div>
-                    <div class="mb-3">
-                        <label for="validUntil" class="form-label">Valid Until</label>
-                        <input type="date" class="form-control" id="validUntil">
-                    </div>
-                    <div class="mb-3">
-                        <label for="purchaseAmount" class="form-label">Amount</label>
-                        <input type="number" class="form-control" id="purchaseAmount">
-                    </div>
-                    <button type="submit" class="btn btn-primary">Submit</button>
-                </form>
-            </div>
-        </div>
-    </div>
+    
 
     <div class="container mt-5">
         <div class="card">

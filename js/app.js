@@ -8,6 +8,15 @@ createApp({
       dailySavings: 7,
       spendToday: 0, // Dynamically calculated or inputted
       savingsAccount: 1000, // Example static value or dynamically updated
+      transaction: {
+        type: 'single', // 'single' or 'repeating'
+        name: '',
+        date: '', // For single transaction
+        validFrom: '', // For repeating transaction
+        validUntil: '', // For repeating transaction
+        interval: 'monthly', // 'monthly', 'yearly', 'biyearly'
+        amount: null,
+      }
     };
   },
   computed: {
@@ -27,6 +36,11 @@ createApp({
       // Force a re-fetch or recalculation of your data. In this example, it's not doing much,
       // but you can expand it to actually reload data from an API or similar.
       console.log("Statistics reloaded."); // Placeholder action
+    },
+    submitTransaction() {
+        // Placeholder for form submission logic
+        console.log(this.transaction);
+        // Reset the form here or navigate to another page
     }
   },
   setup() {
