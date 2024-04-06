@@ -37,17 +37,17 @@
                   </div>
                   <div class="d-flex justify-content-between">
                     <span>Fix Costs:</span>
-                    <strong>- {{ visualDailyOutcome}} CHF</strong>
+                    <strong>{{ visualDailyOutcome}} CHF</strong>
                   </div>
                   <div class="d-flex justify-content-between">
-                    <span>Daily Emergency Savings:</span>
-                    <strong>- {{ visualDailySavings}} CHF</strong>
-                  </div>
-                  <div class="d-flex justify-content-between">
-                    <span>Spend Today:</span>
-                    <strong>- {{ visualSpendToday }} CHF</strong>
+                    <span>Daily Spending Limit</span>
+                    <strong> = {{ visualSpendableMoneyDaily }} CHF</strong>
                   </div>
                   <hr>
+                  <div class="d-flex justify-content-between">
+                    <span>Spend Today:</span>
+                    <strong>{{ visualSpendToday }} CHF</strong>
+                  </div>
                   <div class="d-flex justify-content-between">
                     <span>Free Spendable Money Today:</span>
                     <strong>= {{ visualSpendableMoneyToday }} CHF</strong>
@@ -92,12 +92,17 @@
                     <div class="mb-3">
                         <label for="formSingleTransactionName" class="form-label">Name</label>
                         <input type="text" class="form-control" id="formSingleTransactionName" v-model="formSingleTransaction.name">
+                        <ul class="list-group">
+                          <li v-for="suggestion in transactionNameSuggestions" :key="suggestion" class="list-group-item list-group-item-action" @click="selectSuggestion(suggestion)">
+                              {{ suggestion }}
+                          </li>
+                        </ul>
 
                         <label for="formSingleTransactionDate" class="form-label">Date</label>
                         <input type="date" class="form-control" id="formSingleTransactionDate" v-model="formSingleTransaction.date">
 
                         <label for="formSingleTransactionAmount" class="form-label">Amount</label>
-                        <input type="number" class="form-control" id="formSingleTransactionAmount" v-model="formSingleTransaction.amount">
+                        <input type="number" step=".01" class="form-control" id="formSingleTransactionAmount" v-model="formSingleTransaction.amount">
                     </div>
 
                     <button type="submit" class="btn btn-primary">Send</button>
@@ -147,8 +152,8 @@
                     <label for="formRepeatingTransactionValidUntil" class="form-label">Valid Until</label>
                     <input type="date" class="form-control" id="formRepeatingTransactionValidUntil" v-model="formRepeatingTransaction.validUntil">
 
-                    <label for="formRepeatingTransactionValidUntilAmount" class="form-label">Amount Yearly</label>
-                    <input type="number" class="form-control" id="formRepeatingTransactionValidUntilAmount" v-model="formRepeatingTransaction.amount">
+                    <label for="formRepeatingTransactionlAmount" class="form-label">Amount</label>
+                    <input type="number" step=".01" class="form-control" id="formRepeatingTransactionAmount" v-model="formRepeatingTransaction.amount">
 
                     <div class="mb-3">
                         <label for="interval" class="form-label">Interval</label>
@@ -167,25 +172,25 @@
         </div>
     </div>
     <!-- List of Single Transactions (Purchases and Earnings) -->
-    <div id="app" class="container mt-5">
+    <div class="container mt-5">
         <!-- Single Transactions List -->
         <section class="mt-4">
           <h2>Single Transactions</h2>
           <table class="table">
             <thead>
               <tr>
-                <th style="width: 40%;">Name</th>
-                <th style="width: 50%;">Date</th>
+                <th style="width: 20%;">Name</th>
+                <th style="width: 40%;">Date</th>
                 <th style="width: 20%;">Amount</th>
                 <th style="width: 15%;">Actions</th>
               </tr>
             </thead>
             <tbody>
               <tr v-for="item in singleTransactions" :key="item.transactionID">
-                <td>{{ item.Name }}</td>
-                <td>{{ item.Date }}</td>
-                <td :class="{ 'text-success': item.Amount > 0, 'text-danger': item.Amount < 0 }">
-                  {{ item.Amount > 0 ? '+' : '' }}{{ item.Amount }} CHF
+                <td>{{ item.name }}</td>
+                <td>{{ item.date }}</td>
+                <td :class="{ 'text-success': item.amount > 0, 'text-danger': item.amount < 0 }">
+                  {{ item.Amount > 0 ? '+' : '' }}{{ item.amount }} CHF
                 </td>
                 <td>
                   <button class="btn btn-primary" @click="editItem(item)">Edit</button>
@@ -202,19 +207,19 @@
           <table class="table">
             <thead>
                 <tr>
-                  <th style="width: 40%;">Name</th>
-                  <th style="width: 25%;">Valid From</th>
-                  <th style="width: 25%;">Valid Until</th>
+                  <th style="width: 20%;">Name</th>
+                  <th style="width: 20%;">Valid From</th>
+                  <th style="width: 20%;">Valid Until</th>
                   <th style="width: 20%;">Amount</th>
                   <th style="width: 15%;">Actions</th>
                 </tr>
               </thead>
               <tbody>
                 <tr v-for="item in recurringIncomes" :key="item.rTransactionID">
-                  <td>{{ item.Name }}</td>
-                  <td>{{ item.ValidFrom }}</td>
-                  <td>{{ item.ValidUntil }}</td>
-                  <td>{{ item.Amount }}</td>
+                  <td>{{ item.name }}</td>
+                  <td>{{ item.validFrom }}</td>
+                  <td>{{ item.validUntil }}</td>
+                  <td>{{ item.amount }}</td>
                   <td>
                     <button class="btn btn-primary" @click="editItem(item)">Edit</button>
                     <button class="btn btn-danger" @click="deleteItem(item)">Delete</button>
@@ -230,19 +235,19 @@
             <table class="table">
               <thead>
                   <tr>
-                    <th style="width: 40%;">Name</th>
-                    <th style="width: 25%;">Valid From</th>
-                    <th style="width: 25%;">Valid Until</th>
+                    <th style="width: 20%;">Name</th>
+                    <th style="width: 20%;">Valid From</th>
+                    <th style="width: 20%;">Valid Until</th>
                     <th style="width: 20%;">Amount</th>
                     <th style="width: 15%;">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr v-for="item in recurringOutcomes" :key="item.rTransactionID">
-                    <td>{{ item.Name }}</td>
-                    <td>{{ item.ValidFrom }}</td>
-                    <td>{{ item.ValidUntil }}</td>
-                    <td>{{ item.Amount }}</td>
+                    <td>{{ item.name }}</td>
+                    <td>{{ item.validFrom }}</td>
+                    <td>{{ item.validUntil }}</td>
+                    <td>{{ item.amount }}</td>
                     <td>
                       <button class="btn btn-primary" @click="editItem(item)">Edit</button>
                       <button class="btn btn-danger" @click="deleteItem(item)">Delete</button>
