@@ -20,6 +20,7 @@ createApp({
                 interval: 0
             },
             transactionNameSuggestions: [],
+            isDataLoaded: false,
         };
     },
     computed: {
@@ -33,6 +34,7 @@ createApp({
             return (Number(this.visualDailyIncome) + Number(this.visualDailyOutcome)).toFixed(2);
         },
         visualAverageSpendingsDaily () {
+            
             if (!this.singleTransactions || this.singleTransactions.length === 0) {
                 return 0; // Return 0 if there are no transactions
             }
@@ -40,9 +42,15 @@ createApp({
             // Sum up all spending amounts
             const totalSpendings = this.singleTransactions.reduce((sum, {amount}) => sum + Number(amount), 0);
     
-            // Find the unique dates to count the number of days with transactions
-            const uniqueDates = new Set(this.singleTransactions.map(({date}) => date));
-            const numberOfDays = uniqueDates.size;
+            // Define the start date and today's date
+            const startDate = new Date('2024-02-25');
+            const today = new Date();
+                    
+            // Calculate the difference in days
+            const timeDiff = today - startDate; // This gives time difference in milliseconds
+            const numberOfDays = timeDiff / (1000 * 3600 * 24); // Convert milliseconds to days        
+
+            console.log("number of days:", numberOfDays);
     
             // Calculate the average spendings per day
             const averageSpendings = totalSpendings / numberOfDays;
@@ -116,8 +124,11 @@ createApp({
                 const recurringTransactionsResponse = await fetch('php/getRepeatingTransaction.php');
                 const recurringTransactionsData = await recurringTransactionsResponse.json();
                 this.recurringTransactions = recurringTransactionsData;
+                this.isDataLoaded = true;
+                this.generateChartData();
             } catch (error) {
                 console.error('Failed to fetch data:', error);
+                this.isDataLoaded = false;
             }
         },
         editItem(item){
@@ -244,14 +255,22 @@ createApp({
                 console.error('Error:',error);
             }
         }, 
-        sumOfSpendingsOn(day){
+        sumOfSpendingsOn(day) {
             let dailySpendings = 0;
+            const dayString = this.formatDate(day);
+          
+            //console.log(`Transactions on ${dayString}:`);
             this.singleTransactions.forEach(transaction => {
-                const transactionDate = new Date(transaction.date);
-                if (day.toISOString().split('T')[0] === transactionDate.toISOString().split('T')[0]) {
-                    dailySpendings += Number(transaction.amount); // Assumes spendings are negative, reducing the savings
-                }
+              //console.log(`Transaction Date: ${transaction.date}, Amount: ${transaction.amount}`);
+              const transactionDateString = this.formatDate(new Date(transaction.date));
+          
+              if (dayString === transactionDateString) {
+                //console.log(`Adding amount: ${transaction.amount}`);
+                dailySpendings += Number(transaction.amount);
+              }
             });
+          
+            //console.log(`Total spendings on ${dayString}: ${dailySpendings}`);
             return dailySpendings;
         },
         calculateSavingUntil(day){
@@ -278,6 +297,94 @@ createApp({
         selectSuggestion(suggestion) {
             this.formSingleTransaction.name = suggestion;
             this.transactionNameSuggestions = [];
+        },
+        generateChartData() {
+            //console.log("generating");
+            const labels = [];
+            const cumulativeSavingsData = [];
+            const dailySpendingsData = [];
+            const today = new Date();
+        
+            for (let i = -20; i <= 10; i++) {
+              const date = new Date(today);
+              date.setDate(today.getDate() + i);
+              const dateString = this.formatDate(date);
+        
+              labels.push(dateString);
+              // Utilize your helper functions to calculate data for each day
+              const cumulativeSavings = this.calculateSavingUntil(date);
+              const dailySpendings = this.sumOfSpendingsOn(date);
+              cumulativeSavingsData.push(cumulativeSavings);
+              dailySpendingsData.push(dailySpendings);
+            }
+
+        
+            this.renderChart(labels, cumulativeSavingsData, dailySpendingsData);
+        },
+        renderChart(labels, cumulativeSavingsData, dailySpendingsData) {
+            const ctx = document.getElementById('budgetChart').getContext('2d');
+            const todayString = this.formatDate(new Date());
+
+            const maxCumulativeSavings = Math.max(...cumulativeSavingsData);
+            const maxDailySpendings = Math.max(...dailySpendingsData);
+            const maxChartValue = Math.max(maxCumulativeSavings, maxDailySpendings);
+        
+            new Chart(ctx, {
+              type: 'line',
+              data: {
+                labels: labels,
+                datasets: [{
+                  label: 'Cumulative Savings',
+                  data: cumulativeSavingsData,
+                  borderColor: 'rgb(75, 192, 192)',
+                  tension: 0.1
+                }, {
+                  label: 'Daily Spendings',
+                  data: dailySpendingsData,
+                  borderColor: 'rgb(255, 99, 132)',
+                  tension: 0.1
+                }]
+              },
+              options: {
+                scales: {
+                  x: {
+                    type: 'time',
+                    time: {
+                      unit: 'day'
+                    }
+                  },
+                },
+                plugins: {
+                  annotation: {
+                    annotations: {
+                      todayLine: {
+                        type: 'line',
+                        yMin: 0,
+                        yMax: maxChartValue,
+                        borderColor: 'rgb(54, 162, 235)',
+                        borderWidth: 2,
+                        borderDash: [5, 5],
+                        label: {
+                            enabled: true,
+                            content: 'Today',
+                            position: "center",
+                            backgroundColor: 'rgba(54, 162, 235, 0.5)'
+                          },
+                        xMin: todayString,
+                        xMax: todayString,
+                      }
+                    }
+                  }
+                }
+              }
+            });
+        },
+        formatDate(date) {
+            if (!(date instanceof Date)) {
+              console.error("Invalid date provided to formatDate:", date);
+              return null;
+            }
+            return `${date.getFullYear()}-${('0' + (date.getMonth() + 1)).slice(-2)}-${('0' + date.getDate()).slice(-2)}`;
         }
     },
     watch: {
@@ -294,6 +401,5 @@ createApp({
     },
     mounted (){
         this.fetchTransactions();
-        this.generateChartData();
     }
 }).mount('#app');
