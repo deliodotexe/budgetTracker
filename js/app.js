@@ -8,6 +8,7 @@ createApp({
       dailySavings: 7,
       spendToday: 0, // Dynamically calculated or inputted
       savingsAccount: 1000, // Example static value or dynamically updated
+      AverageSpendDaily: 0,
       transaction: {
         type: 'single', // 'single' or 'repeating'
         name: '',
@@ -37,33 +38,110 @@ createApp({
       // but you can expand it to actually reload data from an API or similar.
       console.log("Statistics reloaded."); // Placeholder action
     },
-    submitTransaction() {
-        // Placeholder for form submission logic
-        console.log(this.transaction);
-        // Reset the form here or navigate to another page
+    async submitTransaction() {
+      const url = 'php/addSingleTransaction.php';
+
+      try {
+        const response = await fetch(url, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            name: this.transaction.name,
+            date: this.transaction.date,
+            amount: this.transaction.amount
+          })
+        });
+    
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+    
+        // Handle response data
+        const result = await response.json();
+        console.log(result); // Process the success response
+    
+        // Optionally, reset the form or update the UI
+      } catch (error) {
+        console.error('Error:', error);
+      }
+    },
+    async submitRepeatingTransaction() {
+      const url = '/path/to/addRepeatingTransaction.php';
+      var interval;
+
+      if(this.transaction.interval === "Every Month") {interval = 12;}
+      if(this.transaction.interval === "Once a Year") {interval = 1;}
+      if(this.transaction.interval === "Twice a Year") {interval = 2;}
+
+      try {
+        const response = await fetch(url, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            name: this.transaction.name,
+            validFrom: this.transaction.validFrom,
+            validUntil: this.transaction.validUntil,
+            interval: interval, // Make sure this matches your backend's expected format
+            amount: this.transaction.amount
+          })
+        });
+      
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+      
+        // Handle response data
+        const result = await response.json();
+        console.log(result); // Process the success response
+      
+        // Optionally, reset the form or update the UI
+      } catch (error) {
+        console.error('Error:', error);
+      }
+    },
+    async submitRepeatingIncome() {
+      const url = '/path/to/addRepeatingTransaction.php';
+
+      try {
+        const response = await fetch(url, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            name: this.transaction.name,
+            validFrom: this.transaction.validFrom,
+            validUntil: this.transaction.validUntil,
+            interval: 12, // Make sure this matches your backend's expected format
+            amount: this.transaction.amount
+          })
+        });
+      
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+      
+        // Handle response data
+        const result = await response.json();
+        console.log(result); // Process the success response
+      
+        // Optionally, reset the form or update the UI
+      } catch (error) {
+        console.error('Error:', error);
+      }
     }
   },
   setup() {
     const lists = reactive([
-        {
-          name: 'Repeating Incomes',
-          items: [
-            // Mock data...
-          ]
-        },
-        {
-          name: 'Fixed Costs',
-          items: [
-            // Mock data...
-          ]
-        },
-        {
-          name: 'Purchases',
-          items: [
-            // Mock data...
-          ]
-        }
-      ]);
+      { name: 'Purchases/Earnings', items: [] },
+      { name: 'Fixed Costs', items: [] },
+      { name: 'Repeating Incomes', items: [] }
+    ]);
+
 
     function editItem(item, listName) {
         // Logic to handle edit - show modal with form
@@ -131,7 +209,7 @@ createApp({
     chartData.datasets[0].data = chartData.labels.map(() => Math.random() * 100);
     chartData.datasets[1].data = chartData.labels.map(() => Math.random() * 100);
 
-    onMounted(() => {
+    onMounted(async () => {
         const ctx = document.getElementById('budgetChart').getContext('2d');
         chart.value = new Chart(ctx, {
           type: 'line',
@@ -168,6 +246,61 @@ createApp({
             }
           }
         });
+
+        try {
+          const purchasesResponse = await fetch('php/getPurchases.php');
+          const purchases = await purchasesResponse.json();
+          lists[0].items = purchases;
+
+          const processedPurchases = purchases.map(item => {
+            return {
+              ...item, // Spread the existing properties
+              type: item.Amount > 0 ? 'income' : 'expense', // Example logic to determine type
+              // Add any other transformations or enrichments here
+            };
+          });
+
+          lists.find(list => list.name === 'Purchases/Earnings').items = processedPurchases;
+
+
+
+          console.log(purchases);
+          console.log(lists[0].items)
+  
+          // Repeat for Fixed Costs and Repeating Incomes
+          const fixCostsResponse = await fetch('php/getFixCosts.php');
+          const fixCosts = await fixCostsResponse.json();
+          lists[1].items = fixCosts;
+
+          const processedFixCosts = fixCosts.map(item => {
+            return {
+              ...item, // Spread the existing properties
+              type: item.Amount > 0 ? 'income' : 'expense', // Example logic to determine type
+              // Add any other transformations or enrichments here
+            };
+          });
+
+          lists.find(list => list.name === 'Fixed Costs').items = processedFixCosts;
+
+
+          //console.log(fixCosts);
+  
+          const repeatingIncomesResponse = await fetch('php/getRepeatingIncomes.php');
+          const repeatingIncomes = await repeatingIncomesResponse.json();
+
+          const processedRepeatingIncomes = repeatingIncomes.map(item => {
+            return {
+              ...item, // Spread the existing properties
+              type: item.Amount > 0 ? 'income' : 'expense', // Example logic to determine type
+              // Add any other transformations or enrichments here
+            };
+          });
+
+          lists.find(list => list.name === 'Repeating Incomes').items = processedRepeatingIncomes;
+          
+        } catch (error) {
+          console.error('Failed to fetch data:', error);
+        }
       });
 
     return { chart, income, incomeType, submitIncome, lists, editItem, deleteItem };

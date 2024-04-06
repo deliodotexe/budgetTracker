@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Budget Manager</title>
+    <link rel="icon" href="favicon.ico">
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.3.0/font/bootstrap-icons.css">
@@ -26,15 +27,15 @@
                 <h4 class="card-title">Overview</h4>
                 <div class="d-flex justify-content-between">
                   <span>Daily Income:</span>
-                    <strong>106,00 CHF</strong>
+                    <strong>{{ dailyIncome }},00 CHF</strong>
                 </div>
                 <div class="d-flex justify-content-between">
                   <span>Fix Costs:</span>
-                  <strong>- 60,00 CHF</strong>
+                  <strong>- {{dailyFixedCosts}},00 CHF</strong>
                 </div>
                 <div class="d-flex justify-content-between">
                   <span>Daily Emergency Savings:</span>
-                  <strong>- 7,00 CHF</strong>
+                  <strong>- {{dailySavings}},00 CHF</strong>
                 </div>
                 <div class="d-flex justify-content-between">
                   <span>Spend Today:</span>
@@ -47,7 +48,7 @@
                 </div>
                 <div class="d-flex justify-content-between">
                   <span>Savings on Account:</span>
-                  <strong>+ 1000,00 CHF</strong>
+                  <strong>+ {{savingsAccount}},00 CHF</strong>
                 </div>
                 <hr>
                 <div class="d-flex justify-content-between">
@@ -68,7 +69,7 @@
         <div class="card">
             <div class="card-body">
                 <h4 class="card-title">Add Transaction</h4>
-                <form @submit.prevent="submitTransaction">
+                <form @submit.prevent="transaction.type === 'single' ? submitTransaction() : submitRepeatingTransaction()">
                     <div class="mb-3">
                         <div class="form-check">
                             <input class="form-check-input" type="radio" id="singleTransaction" value="single" v-model="transaction.type">
@@ -138,7 +139,7 @@
         <div class="card">
           <div class="card-body">
             <h4 class="card-title">Update Income</h4>
-            <form @submit.prevent="submitIncome">
+            <form @submit.prevent="transaction.type === 'single' ? submitTransaction() : submitRepeatingIncome()">
               <div class="mb-3">
                 <div class="form-check form-check-inline">
                   <input class="form-check-input" type="radio" id="singleTransaction" value="single" v-model="incomeType">
@@ -188,22 +189,22 @@
             <thead>
               <tr>
                 <th style="width: 40%;">Name</th>
-                <th v-if="list.name !== 'Purchases'" style="width: 25%;">Valid From</th>
-                <th v-if="list.name !== 'Purchases'" style="width: 25%;">Valid Until</th>
-                <th v-if="list.name === 'Purchases'" style="width: 50%;">Date</th>
+                <th v-if="list.name !== 'Purchases/Earnings'" style="width: 25%;">Valid From</th>
+                <th v-if="list.name !== 'Purchases/Earnings'" style="width: 25%;">Valid Until</th>
+                <th v-if="list.name === 'Purchases/Earnings'" style="width: 50%;">Date</th>
                 <th style="width: 20%;">Amount</th>
                 <th style="width: 15%;">Actions</th>
               </tr>
             </thead>
             <tbody>
               <tr v-for="item in list.items" :key="item.id">
-                <td>{{ item.name }}</td>
-                <td v-if="list.name !== 'Purchases'">{{ item.validFrom }}</td>
-                <td v-if="list.name !== 'Purchases'">{{ item.validUntil }}</td>
-                <td v-if="list.name === 'Purchases'">{{ item.date }}</td>
+                <td>{{ item.Name }}</td>
+                <td v-if="list.name !== 'Purchases/Earnings'">{{ item.ValidFrom }}</td>
+                <td v-if="list.name !== 'Purchases/Earnings'">{{ item.ValidUntil }}</td>
+                <td v-if="list.name === 'Purchases/Earnings'">{{ item.Date }}</td>
                 <td :class="{ 'text-success': item.type === 'income', 'text-danger': item.type === 'expense' }">
-                  <template v-if="item.type === 'income'">+{{ item.amount }}</template>
-                  <template v-if="item.type === 'expense'">-{{ item.amount }}</template>
+                  <template v-if="item.type === 'income'">+{{ item.Amount }}</template>
+                  <template v-if="item.type === 'expense'">{{ item.Amount }}</template>
                 </td>
                 <td>
                   <button class="btn btn-primary" @click="editItem(item, list.name)">Edit</button>
