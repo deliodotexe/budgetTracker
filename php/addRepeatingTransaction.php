@@ -3,13 +3,13 @@ require 'db.php';
 
 $input = (array) json_decode(file_get_contents('php://input'), TRUE);
 
-$sql = "INSERT INTO repeatingtransactions (Name, ValidFrom, ValidUntil, Amount) VALUES (:Name, :ValidFrom, :ValidUntil, :Amount)";
+$sql = "INSERT INTO repeatingtransactions (Name, ValidFrom, ValidUntil, Amount) VALUES (:name, :validFrom, :validUntil, :amount)";
 $stmt = $pdo->prepare($sql);
 $stmt->execute([
-    'Name' => $input['Name'],
-    'ValidFrom' => $input['ValidFrom'],
-    'ValidUntil' => $input['ValidUntil'],
-    'Amount' => $input['Amount']
+    'mame' => $input['name'],
+    'validFrom' => $input['validFrom'],
+    'validUntil' => $input['validUntil'],
+    'amount' => $input['amount']
 ]);
 
 echo json_encode(['status' => 'success']);

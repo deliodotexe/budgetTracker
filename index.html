@@ -139,7 +139,7 @@
         <div class="card">
           <div class="card-body">
             <h4 class="card-title">Update Income</h4>
-            <form @submit.prevent="transaction.type === 'single' ? submitTransaction() : submitRepeatingIncome()">
+            <form @submit.prevent="transaction.type === 'single' ? submitIncome() : submitRepeatingIncome()">
               <div class="mb-3">
                 <div class="form-check form-check-inline">
                   <input class="form-check-input" type="radio" id="singleTransaction" value="single" v-model="incomeType">

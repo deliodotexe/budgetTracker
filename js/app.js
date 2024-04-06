@@ -50,6 +50,35 @@ createApp({
           body: JSON.stringify({
             name: this.transaction.name,
             date: this.transaction.date,
+            amount: this.transaction.amount * -1
+          })
+        });
+    
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+    
+        // Handle response data
+        const result = await response.json();
+        console.log(result); // Process the success response
+    
+        // Optionally, reset the form or update the UI
+      } catch (error) {
+        console.error('Error:', error);
+      }
+    },
+    async submitIncome() {
+      const url = 'php/addSingleTransaction.php';
+
+      try {
+        const response = await fetch(url, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            name: this.transaction.name,
+            date: this.transaction.date,
             amount: this.transaction.amount
           })
         });
@@ -68,7 +97,7 @@ createApp({
       }
     },
     async submitRepeatingTransaction() {
-      const url = '/path/to/addRepeatingTransaction.php';
+      const url = '/php/addRepeatingTransaction.php';
       var interval;
 
       if(this.transaction.interval === "Every Month") {interval = 12;}
@@ -86,7 +115,7 @@ createApp({
             validFrom: this.transaction.validFrom,
             validUntil: this.transaction.validUntil,
             interval: interval, // Make sure this matches your backend's expected format
-            amount: this.transaction.amount
+            amount: this.transaction.amount * -1
           })
         });
       
@@ -104,7 +133,7 @@ createApp({
       }
     },
     async submitRepeatingIncome() {
-      const url = '/path/to/addRepeatingTransaction.php';
+      const url = 'php/addRepeatingTransaction.php';
 
       try {
         const response = await fetch(url, {
@@ -264,8 +293,8 @@ createApp({
 
 
 
-          console.log(purchases);
-          console.log(lists[0].items)
+          //console.log(purchases);
+          //console.log(lists[0].items)
   
           // Repeat for Fixed Costs and Repeating Incomes
           const fixCostsResponse = await fetch('php/getFixCosts.php');
