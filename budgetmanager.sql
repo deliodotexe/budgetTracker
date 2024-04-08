@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Apr 06, 2024 at 03:43 PM
+-- Generation Time: Apr 07, 2024 at 01:07 AM
 -- Server version: 10.4.28-MariaDB
 -- PHP Version: 8.2.4
 
@@ -28,13 +28,19 @@ SET time_zone = "+00:00";
 --
 
 CREATE TABLE `repeatingtransactions` (
-  `rTransactionsID` int(11) NOT NULL,
-  `AmountYearly` int(11) NOT NULL,
-  `ValidFrom` date NOT NULL DEFAULT current_timestamp(),
-  `ValidUntil` int(11) NOT NULL,
+  `rTransactionID` int(11) NOT NULL,
+  `amount` decimal(6,2) NOT NULL,
+  `validFrom` date NOT NULL DEFAULT current_timestamp(),
+  `validUntil` date NOT NULL,
   `transactionInterval` int(11) NOT NULL,
-  `Name` varchar(255) NOT NULL
+  `name` varchar(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `repeatingtransactions`
+--
+
+
 
 -- --------------------------------------------------------
 
@@ -44,10 +50,15 @@ CREATE TABLE `repeatingtransactions` (
 
 CREATE TABLE `transactions` (
   `transactionID` int(11) NOT NULL,
-  `Name` varchar(255) NOT NULL,
-  `Date` date NOT NULL DEFAULT current_timestamp(),
-  `Amount` int(11) NOT NULL
+  `name` varchar(255) NOT NULL,
+  `date` date NOT NULL DEFAULT current_timestamp(),
+  `amount` decimal(6,2) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `transactions`
+--
+
 
 --
 -- Indexes for dumped tables
@@ -57,7 +68,7 @@ CREATE TABLE `transactions` (
 -- Indexes for table `repeatingtransactions`
 --
 ALTER TABLE `repeatingtransactions`
-  ADD PRIMARY KEY (`rTransactionsID`);
+  ADD PRIMARY KEY (`rTransactionID`);
 
 --
 -- Indexes for table `transactions`
@@ -73,13 +84,13 @@ ALTER TABLE `transactions`
 -- AUTO_INCREMENT for table `repeatingtransactions`
 --
 ALTER TABLE `repeatingtransactions`
-  MODIFY `rTransactionsID` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `rTransactionID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
 
 --
 -- AUTO_INCREMENT for table `transactions`
 --
 ALTER TABLE `transactions`
-  MODIFY `transactionID` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `transactionID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=41;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

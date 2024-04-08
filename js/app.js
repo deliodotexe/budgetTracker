@@ -1,6 +1,6 @@
 const { createApp, onMounted } = Vue;
 
-createApp({
+const vm = createApp({
     data() {
         return {
             singleTransactions: [],
@@ -25,7 +25,8 @@ createApp({
     },
     computed: {
         visualSpendableMoneyToday () {
-            return (this.visualSpendableMoneyDaily - Number(this.visualSpendToday)).toFixed(2);
+            //console.log((this.visualSpendableMoneyDaily - Number(this.visualSpendToday)));
+            return (Number(this.visualSpendableMoneyDaily) + Number(this.visualSpendToday)).toFixed(2);
         },
         visualSpendableMoneyTotal () {
             return (Number(this.visualSpendableMoneyToday) + Number(this.visualSavingsOnAccount)).toFixed(2);
@@ -41,16 +42,16 @@ createApp({
     
             // Sum up all spending amounts
             const totalSpendings = this.singleTransactions.reduce((sum, {amount}) => sum + Number(amount), 0);
+
     
             // Define the start date and today's date
             const startDate = new Date('2024-02-25');
             const today = new Date();
-                    
+
             // Calculate the difference in days
             const timeDiff = today - startDate; // This gives time difference in milliseconds
             const numberOfDays = timeDiff / (1000 * 3600 * 24); // Convert milliseconds to days        
 
-            console.log("number of days:", numberOfDays);
     
             // Calculate the average spendings per day
             const averageSpendings = totalSpendings / numberOfDays;
@@ -274,7 +275,7 @@ createApp({
             return dailySpendings;
         },
         calculateSavingUntil(day){
-            const startDate = new Date('2024-02-25');
+            const startDate = new Date('2024-02-26');
             const endDate = new Date(day);
             let totalSaving = 0;
 
@@ -289,7 +290,6 @@ createApp({
                         dailyIncome += (Number(transaction.amount) * transaction.transactionInterval / 365);
                     }
                 });
-
                 totalSaving += Number(dailyIncome) + Number(dailySpendings);
             }
             return Number(totalSaving).toFixed(2);
@@ -403,3 +403,5 @@ createApp({
         this.fetchTransactions();
     }
 }).mount('#app');
+
+window.vm = vm;

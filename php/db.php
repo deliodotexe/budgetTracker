@@ -1,5 +1,5 @@
 <?php
-$host = 'localhost';
+$host = 'database-container';
 $db = 'budgetmanager';
 $user = 'root';
 $pass = '';
