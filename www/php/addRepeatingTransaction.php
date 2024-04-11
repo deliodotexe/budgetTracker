@@ -12,6 +12,6 @@ $stmt->execute([
     'amount' => $input['amount'],
     'transactionInterval' => $input['transactionInterval']
 ]);
-
+header('Content-Type: application/json');
 echo json_encode(['status' => 'success']);
 ?>

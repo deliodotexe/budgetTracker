@@ -193,7 +193,7 @@
                 <td :class="{ 'text-success': item.amount > 0, 'text-danger': item.amount < 0 }">
                   {{ item.Amount > 0 ? '+' : '' }}{{ item.amount }} CHF
                 </td>
-                <td>
+                <td style="gap: 10px;display: flex;">
                   <button class="btn btn-primary" @click="editItem(item)">Edit</button>
                   <button class="btn btn-danger" @click="deleteItem(item)">Delete</button>
                 </td>
@@ -221,7 +221,7 @@
                   <td>{{ item.validFrom }}</td>
                   <td>{{ item.validUntil }}</td>
                   <td>{{ item.amount }}</td>
-                  <td>
+                  <td style="gap: 10px;display: flex;">
                     <button class="btn btn-primary" @click="editItem(item)">Edit</button>
                     <button class="btn btn-danger" @click="deleteItem(item)">Delete</button>
                   </td>
@@ -249,7 +249,7 @@
                     <td>{{ item.validFrom }}</td>
                     <td>{{ item.validUntil }}</td>
                     <td>{{ item.amount }}</td>
-                    <td>
+                    <td style="gap: 10px;display: flex;">
                       <button class="btn btn-primary" @click="editItem(item)">Edit</button>
                       <button class="btn btn-danger" @click="deleteItem(item)">Delete</button>
                     </td>

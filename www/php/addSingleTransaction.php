@@ -10,6 +10,6 @@ $stmt->execute([
     'date' => $input['date'],
     'amount' => $input['amount']
 ]);
-
+header('Content-Type: application/json');
 echo json_encode(['status' => 'success']);
 ?>
