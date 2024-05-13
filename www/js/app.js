@@ -3,6 +3,8 @@ const { createApp, onMounted } = Vue;
 const vm = createApp({
     data() {
         return {
+            year: '2024-01-01',
+            beginning: '2024-02-25',
             singleTransactions: [],
             recurringTransactions: [],
             formSingleTransaction: {
@@ -18,6 +20,20 @@ const vm = createApp({
                 validUntil: '',
                 amount: 0,
                 interval: 0
+            },
+            editFormTransaction: {
+                transactionID: '',
+                name: '',
+                date: '',
+                amount: ''
+            },
+            editFormRecurringTransaction: {
+                rTransactionID: '',
+                name: '',
+                validFrom: '',
+                validUntil: '',
+                transactionInterval: '',
+                amount: ''
             },
             transactionNameSuggestions: [],
             isDataLoaded: false,
@@ -45,7 +61,7 @@ const vm = createApp({
 
     
             // Define the start date and today's date
-            const startDate = new Date('2024-02-25');
+            const startDate = new Date(this.beginning);
             const today = new Date();
 
             // Calculate the difference in days
@@ -83,6 +99,23 @@ const vm = createApp({
             const dailyIncome = totalYearlyIncome / 365;
             return dailyIncome.toFixed(2);
         },
+        visualMonthlyOutcome(){
+            const today = new Date();
+            today.setHours(0,0,0,0)
+
+            const validRecurringOutcomes = this.recurringOutcomes.filter(outcome => {
+                const validFrom = new Date(outcome.validFrom);
+                const validUntil = new Date(outcome.validUntil);
+                return validFrom <= today && today <= validUntil;
+            });
+            const totalYearlyOutcome = validRecurringOutcomes.reduce((total, outcome) => {
+                const yearlyAmount = (outcome.amount * outcome.transactionInterval);
+                return total + yearlyAmount;
+            }, 0);
+
+            const dailyOutcome = totalYearlyOutcome / 12;
+            return dailyOutcome.toFixed(2);
+        },
         visualDailyOutcome (){
             const today = new Date();
             today.setHours(0,0,0,0)
@@ -113,6 +146,29 @@ const vm = createApp({
         },
         visualSavingsOnAccount(){
             return this.calculateSavingUntil(new Date());
+        },
+        visualRareReaccuringTransaction (){
+            const startDate = new Date(this.year);
+            const today = new Date();
+
+            //let startYear = startDate.getFullYear();
+            let startMonth = startDate.getMonth();
+
+            //let todayYear = today.getFullYear();
+            let todayMonth = today.getMonth();
+            //const amountOfMonths = (Number(todayYear) - Number(startYear)) * 12 + (Number(todayMonth) - Number(startMonth));
+            const amountOfMonths = (Number(todayMonth) - Number(startMonth));
+
+            const monthlySaving = Math.abs(this.recurringTransactions.reduce((accumulator, transaction) => {
+                if(transaction.transactionInterval < 12 && transaction.amount < 0 && Date(transaction.validFrom) <= Date(today) && Date(transaction.validUntil) >= Date(today)){
+                    return Number(accumulator) + Number(transaction.amount)* Number(transaction.transactionInterval);
+                }
+                return Number(accumulator);                
+            },0) / 12).toFixed(2);
+
+            const accountBalance = (monthlySaving * amountOfMonths).toFixed(2);            
+
+            return String(accountBalance) + "CHF (" +monthlySaving+"CHF/m)"
         }
     },
     methods: {
@@ -132,8 +188,75 @@ const vm = createApp({
                 this.isDataLoaded = false;
             }
         },
-        editItem(item){
-            //TODO
+        editItem(item) {
+            // Populating the edit form with the item data
+            this.editFormTransaction.transactionID = item.transactionID;
+            this.editFormTransaction.name = item.name;
+            this.editFormTransaction.date = item.date;
+            this.editFormTransaction.amount = item.amount;
+
+
+            // Using Bootstrap's modal JS to show the modal
+            const modal = new bootstrap.Modal(document.getElementById('editTransactionModal'));
+            modal.show();
+        },
+        editItemRecurring(item){
+            this.editFormRecurringTransaction.rTransactionID = item.rTransactionID;
+            this.editFormRecurringTransaction.validFrom = item.validFrom;
+            this.editFormRecurringTransaction.validUntil = item.validUntil;
+            this.editFormRecurringTransaction.amount = item.amount;
+            this.editFormRecurringTransaction.transactionInterval = item.transactionInterval;
+            this.editFormRecurringTransaction.name = item.name;
+
+            const modal = new bootstrap.Modal(document.getElementById('editRecurringTransactionModal'));
+            modal.show();
+
+        },
+        submitEditTransaction() {
+            // Code to submit the updated data to the server
+            const url = 'php/updateTransaction.php'; // You'll need to create this PHP file
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(this.editFormTransaction)
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Success:', data);
+                // You might want to refresh the transactions list or handle UI feedback
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+            });
+
+            // Optionally close the modal after submission
+            const modal = bootstrap.Modal.getInstance(document.getElementById('editTransactionModal'));
+            modal.hide();
+        },
+        submitEditTransactionRecurring() {
+            // Code to submit the updated data to the server
+            const url = 'php/updateTransactionRecurring.php'; // You'll need to create this PHP file
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(this.editFormRecurringTransaction)
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Success:', data);
+                // You might want to refresh the transactions list or handle UI feedback
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+            });
+
+            // Optionally close the modal after submission
+            const modal = bootstrap.Modal.getInstance(document.getElementById('editRecurringTransactionModal'));
+            modal.hide();
         },
         deleteItem(item){
             //TODO
@@ -275,7 +398,7 @@ const vm = createApp({
             return dailySpendings;
         },
         calculateSavingUntil(day){
-            const startDate = new Date('2024-02-26');
+            const startDate = new Date(this.beginning);
             const endDate = new Date(day);
             let totalSaving = 0;
 

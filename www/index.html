@@ -66,6 +66,14 @@
                       <span>Avr. Spendings per Day</span>
                       <strong>{{ visualAverageSpendingsDaily  }} CHF</strong>
                   </div>
+                  <div class="d-flex justify-content-between">
+                    <span>Money for rare Reaccuring Transactions:</span>
+                    <strong>{{ visualRareReaccuringTransaction }}</strong>
+                  </div>
+                  <div class="d-flex justify-content-between">
+                    <span>Monthly Fix Costs:</span>
+                    <strong>{{ visualMonthlyOutcome }} CHF</strong>
+                  </div>
             </div>
         </div>
     </div>
@@ -174,93 +182,168 @@
     </div>
     <!-- List of Single Transactions (Purchases and Earnings) -->
     <div class="container mt-5">
-        <!-- Single Transactions List -->
-        <section class="mt-4">
-          <h2>Single Transactions</h2>
-          <table class="table">
-            <thead>
-              <tr>
-                <th style="width: 20%;">Name</th>
-                <th style="width: 40%;">Date</th>
-                <th style="width: 20%;">Amount</th>
-                <th style="width: 15%;">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="item in singleTransactions" :key="item.transactionID">
-                <td>{{ item.name }}</td>
-                <td>{{ item.date }}</td>
-                <td :class="{ 'text-success': item.amount > 0, 'text-danger': item.amount < 0 }">
-                  {{ item.Amount > 0 ? '+' : '' }}{{ item.amount }} CHF
-                </td>
-                <td style="gap: 10px;display: flex;">
-                  <button class="btn btn-primary" @click="editItem(item)">Edit</button>
-                  <button class="btn btn-danger" @click="deleteItem(item)">Delete</button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </section>
       
-        <!-- Recurring Incomes List -->
-        <section class="mt-4">
-          <h2>Recurring Incomes</h2>
-          <table class="table">
-            <thead>
-                <tr>
-                  <th style="width: 20%;">Name</th>
-                  <th style="width: 20%;">Valid From</th>
-                  <th style="width: 20%;">Valid Until</th>
-                  <th style="width: 20%;">Amount</th>
-                  <th style="width: 15%;">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="item in recurringIncomes" :key="item.rTransactionID">
-                  <td>{{ item.name }}</td>
-                  <td>{{ item.validFrom }}</td>
-                  <td>{{ item.validUntil }}</td>
-                  <td>{{ item.amount }}</td>
-                  <td style="gap: 10px;display: flex;">
-                    <button class="btn btn-primary" @click="editItem(item)">Edit</button>
-                    <button class="btn btn-danger" @click="deleteItem(item)">Delete</button>
-                  </td>
-                </tr>
-              </tbody>
-          </table>
-        </section>
+      <!-- Recurring Incomes List -->
+      <section class="mt-4">
+        <h2>Recurring Incomes</h2>
+        <table class="table">
+          <thead>
+            <tr>
+              <th style="width: 20%;">Name</th>
+              <th style="width: 20%;">Valid From</th>
+              <th style="width: 20%;">Valid Until</th>
+              <th style="width: 20%;">Amount</th>
+              <th style="width: 15%;">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="item in recurringIncomes" :key="item.rTransactionID">
+              <td>{{ item.name }}</td>
+              <td>{{ item.validFrom }}</td>
+              <td>{{ item.validUntil }}</td>
+              <td>{{ item.amount }}</td>
+              <td style="gap: 10px;display: flex;">
+                <button class="btn btn-primary" @click="editItemRecurring(item)">Edit</button>
+                <button class="btn btn-danger" @click="deleteItemRecurring(item)">Delete</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
       
-        <!-- Recurring Expenses List -->
-        <section class="mt-4">
-            <h2>Recurring Outcomes</h2>
-            <table class="table">
-              <thead>
-                  <tr>
-                    <th style="width: 20%;">Name</th>
-                    <th style="width: 20%;">Valid From</th>
-                    <th style="width: 20%;">Valid Until</th>
-                    <th style="width: 20%;">Amount</th>
-                    <th style="width: 15%;">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr v-for="item in recurringOutcomes" :key="item.rTransactionID">
-                    <td>{{ item.name }}</td>
-                    <td>{{ item.validFrom }}</td>
-                    <td>{{ item.validUntil }}</td>
-                    <td>{{ item.amount }}</td>
-                    <td style="gap: 10px;display: flex;">
-                      <button class="btn btn-primary" @click="editItem(item)">Edit</button>
-                      <button class="btn btn-danger" @click="deleteItem(item)">Delete</button>
-                    </td>
-                  </tr>
-                </tbody>
-            </table>
-          </section>
-      </div>     
-
-      
+      <!-- Recurring Expenses List -->
+      <section class="mt-4">
+        <h2>Recurring Outcomes</h2>
+        <table class="table">
+          <thead>
+            <tr>
+              <th style="width: 20%;">Name</th>
+              <th style="width: 20%;">Valid From</th>
+              <th style="width: 20%;">Valid Until</th>
+              <th style="width: 20%;">Amount</th>
+              <th style="width: 15%;">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="item in recurringOutcomes" :key="item.rTransactionID">
+              <td>{{ item.name }}</td>
+              <td>{{ item.validFrom }}</td>
+              <td>{{ item.validUntil }}</td>
+              <td>{{ item.amount }}</td>
+              <td style="gap: 10px;display: flex;">
+                <button class="btn btn-primary" @click="editItemRecurring(item)">Edit</button>
+                <button class="btn btn-danger" @click="deleteItemRecurring(item)">Delete</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+      <!-- Single Transactions List -->
+      <section class="mt-4">
+        <h2>Single Transactions</h2>
+        <table class="table">
+          <thead>
+            <tr>
+              <th style="width: 20%;">Name</th>
+              <th style="width: 40%;">Date</th>
+              <th style="width: 20%;">Amount</th>
+              <th style="width: 15%;">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="item in singleTransactions" :key="item.transactionID">
+              <td>{{ item.name }}</td>
+              <td>{{ item.date }}</td>
+              <td :class="{ 'text-success': item.amount > 0, 'text-danger': item.amount < 0 }">
+                {{ item.Amount > 0 ? '+' : '' }}{{ item.amount }} CHF
+              </td>
+              <td style="gap: 10px;display: flex;">
+                <button class="btn btn-primary" @click="editItem(item)">Edit</button>
+                <button class="btn btn-danger" @click="deleteItem(item)">Delete</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+    </div>           
+    <!-- Edit Transaction Modal -->
+    <div class="modal fade" id="editTransactionModal" tabindex="-1" aria-labelledby="editTransactionModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="editTransactionModalLabel">Edit Transaction</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <form @submit.prevent="submitEditTransaction()">
+              <!-- Name Field -->
+              <div class="mb-3">
+                <label for="editName" class="form-label">Name</label>
+                <input type="text" class="form-control" id="editName" v-model="editFormTransaction.name">
+              </div>
+              <!-- Date Field -->
+              <div class="mb-3">
+                <label for="editDate" class="form-label">Date</label>
+                <input type="date" class="form-control" id="editDate" v-model="editFormTransaction.date">
+              </div>
+              <!-- Amount Field -->
+              <div class="mb-3">
+                <label for="editAmount" class="form-label">Amount</label>
+                <input type="number" step=".01" class="form-control" id="editAmount" v-model="editFormTransaction.amount">
+              </div>
+              <button type="submit" class="btn btn-primary">Save changes</button>
+            </form>
+          </div>
+        </div>
+      </div>
     </div>
+
+    <div class="modal fade" id="editRecurringTransactionModal" tabindex="-1" aria-labelledby="editRecurringTransactionModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="editRecurringTransactionModalLabel">Edit Transaction</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <form @submit.prevent="submitEditTransactionRecurring()">
+              <!-- Name Field -->
+              <div class="mb-3">
+                <label for="editName" class="form-label">Name</label>
+                <input type="text" class="form-control" id="editName" v-model="editFormRecurringTransaction.name">
+              </div>
+              <!-- Date Field -->
+              <div class="mb-3">
+                <label for="editValidFrom" class="form-label">Valid From</label>
+                <input type="date" class="form-control" id="editValidFrom" v-model="editFormRecurringTransaction.validFrom">
+              </div>
+              <div class="mb-3">
+                <label for="editValidUntil" class="form-label">Valid Until</label>
+                <input type="date" class="form-control" id="editValidUntil" v-model="editFormRecurringTransaction.validUntil">
+              </div>
+              <!-- Amount Field -->
+              <div class="mb-3">
+                <label for="editAmount" class="form-label">Amount</label>
+                <input type="number" step=".01" class="form-control" id="editAmount" v-model="editFormRecurringTransaction.amount">
+              </div>
+
+              <div class="mb-3">
+                <label for="interval" class="form-label">Interval</label>
+                <select id="interval" class="form-select" v-model="editFormRecurringTransaction.transactionInterval">
+                    <option value="12">Every Month</option>
+                    <option value="1">Once a Year</option>
+                    <option value="2">Twice a Year</option>
+                </select>
+            </div>
+
+              <button type="submit" class="btn btn-primary">Save changes</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+    </div>
+
 
     <!-- Vue.js -->
       <script src="https://unpkg.com/vue@3"></script>
